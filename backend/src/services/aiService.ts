@@ -52,7 +52,7 @@ export class AIService {
       throw new Error('AI service not configured');
     }
     this.genAI = new GoogleGenerativeAI(apiKey);
-    this.modelName = process.env.GEMINI_MODEL || 'gemini-2.0-flash-lite';
+    this.modelName = process.env.GEMINI_MODEL || 'gemini-3.5-flash-lite';
   }
 
   /**
