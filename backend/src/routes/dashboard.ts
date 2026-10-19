@@ -8,7 +8,7 @@ const router = Router();
 router.use(requireAuth);
 
 function getUserTransactions(userId: string) {
-  return dataStore.getTransactions(userId);
+  return dataStore.getTransactions(userId).filter((t) => !dataStore.isTransactionDeleted(t.id));
 }
 
 // GET /api/dashboard/stats
@@ -48,7 +48,9 @@ router.get('/stats', async (req: AuthRequest, res: Response) => {
         .eq('is_confirmed', true);
       if (dbTxs && dbTxs.length > 0) {
         const localIds = new Set(allTxs.map((t) => t.id));
-        const missingFromLocal = dbTxs.filter((t) => !localIds.has(t.id)).map((t) => ({
+        const missingFromLocal = dbTxs
+          .filter((t) => !localIds.has(t.id) && !dataStore.isTransactionDeleted(t.id))
+          .map((t) => ({
           id: t.id,
           userId: t.user_id,
           type: t.type,

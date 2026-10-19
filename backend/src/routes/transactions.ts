@@ -74,9 +74,10 @@ router.get('/', async (req: AuthRequest, res: Response) => {
   if (start) localTxs = localTxs.filter((t) => t.date >= start);
   if (end) localTxs = localTxs.filter((t) => t.date <= end);
 
-  // Merge DB and dataStore avoiding duplicates
+  // Merge DB and dataStore avoiding duplicates and ignoring deleted items
   const dbIds = new Set(dbTransactions.map((t) => t.id));
-  const merged = [...dbTransactions, ...localTxs.filter((t) => !dbIds.has(t.id))];
+  const merged = [...dbTransactions, ...localTxs.filter((t) => !dbIds.has(t.id))]
+    .filter((t) => !dataStore.isTransactionDeleted(t.id));
 
   // Sort
   merged.sort((a, b) => {

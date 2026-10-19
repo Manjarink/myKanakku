@@ -41,7 +41,7 @@ router.get('/', async (req: AuthRequest, res: Response) => {
     const prevEndStr = prevEnd.toISOString().split('T')[0];
 
     // Combine Supabase and local dataStore transactions
-    let allUserTxs = dataStore.getTransactions(userId);
+    let allUserTxs = dataStore.getTransactions(userId).filter((t) => !dataStore.isTransactionDeleted(t.id));
     try {
       const { data: dbTxs } = await supabaseAdmin
         .from('transactions')
@@ -50,7 +50,9 @@ router.get('/', async (req: AuthRequest, res: Response) => {
         .eq('is_confirmed', true);
       if (dbTxs && dbTxs.length > 0) {
         const localIds = new Set(allUserTxs.map((t) => t.id));
-        const missing = dbTxs.filter((t) => !localIds.has(t.id)).map((t) => ({
+        const missing = dbTxs
+          .filter((t) => !localIds.has(t.id) && !dataStore.isTransactionDeleted(t.id))
+          .map((t) => ({
           id: t.id,
           userId: t.user_id,
           type: t.type,
@@ -244,7 +246,7 @@ router.get('/', async (req: AuthRequest, res: Response) => {
 router.get('/export', async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.userId!;
-    const txs = dataStore.getTransactions(userId);
+    const txs = dataStore.getTransactions(userId).filter((t) => !dataStore.isTransactionDeleted(t.id));
 
     const headers = 'Date,Type,Amount,Category,Description\n';
     const rows = txs.map((t) => {

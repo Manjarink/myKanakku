@@ -132,6 +132,7 @@ export type MessageIntent =
   | 'set_reminder'
   | 'out_of_scope'
   | 'clarification'
+  | 'reset_all_expenses'
   | 'general_chat';
 
 export interface ParsedTransaction {
