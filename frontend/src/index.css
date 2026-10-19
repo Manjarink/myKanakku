@@ -1,0 +1,210 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply border-surface-600;
+  }
+
+  html {
+    @apply scroll-smooth;
+  }
+
+  body {
+    @apply bg-surface-900 text-white font-sans antialiased min-h-screen;
+    background: radial-gradient(ellipse at 20% 50%, rgba(124,58,237,0.08) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 20%, rgba(6,182,212,0.06) 0%, transparent 60%),
+                #0a0a14;
+  }
+
+  ::-webkit-scrollbar {
+    @apply w-1.5;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-surface-800;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-surface-500 rounded-full;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-primary-600;
+  }
+
+  ::selection {
+    @apply bg-primary-600/50 text-white;
+  }
+}
+
+@layer components {
+  /* Glass card */
+  .glass-card {
+    @apply bg-surface-800/60 backdrop-blur-xl border border-surface-600/50 rounded-2xl shadow-card;
+  }
+
+  .glass-card-hover {
+    @apply glass-card transition-all duration-300 hover:bg-surface-700/60 hover:border-primary-500/30 hover:shadow-card-hover;
+  }
+
+  /* Gradient text */
+  .gradient-text {
+    @apply bg-gradient-to-r from-primary-400 to-accent-400 bg-clip-text text-transparent;
+  }
+
+  .gradient-text-income {
+    @apply bg-gradient-to-r from-success-400 to-accent-400 bg-clip-text text-transparent;
+  }
+
+  .gradient-text-expense {
+    @apply bg-gradient-to-r from-danger-400 to-warning-400 bg-clip-text text-transparent;
+  }
+
+  /* Buttons */
+  .btn-primary {
+    @apply relative overflow-hidden bg-gradient-primary text-white font-semibold px-6 py-3 rounded-xl
+           transition-all duration-300 hover:shadow-glow-primary hover:scale-[1.02]
+           active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100;
+  }
+
+  .btn-secondary {
+    @apply bg-surface-700 text-white font-semibold px-6 py-3 rounded-xl border border-surface-500
+           transition-all duration-300 hover:bg-surface-600 hover:border-primary-500/50
+           active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-ghost {
+    @apply text-gray-400 font-medium px-4 py-2 rounded-lg transition-all duration-200
+           hover:text-white hover:bg-surface-700 active:scale-[0.98];
+  }
+
+  .btn-danger {
+    @apply bg-danger-600 text-white font-semibold px-6 py-3 rounded-xl
+           transition-all duration-300 hover:bg-danger-500 hover:shadow-glow-danger
+           active:scale-[0.98] disabled:opacity-50;
+  }
+
+  /* Inputs */
+  .input-field {
+    @apply w-full bg-surface-700/80 border border-surface-500 text-white placeholder-gray-500
+           rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary-500/50
+           focus:border-primary-500 transition-all duration-200;
+  }
+
+  .input-label {
+    @apply block text-sm font-medium text-gray-300 mb-1.5;
+  }
+
+  /* Navigation */
+  .nav-item {
+    @apply flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 font-medium
+           transition-all duration-200 cursor-pointer;
+  }
+
+  .nav-item:hover {
+    @apply bg-surface-700 text-white;
+  }
+
+  .nav-item.active {
+    @apply bg-primary-600/20 text-primary-400 border border-primary-500/30;
+  }
+
+  /* Chat */
+  .chat-bubble-user {
+    @apply bg-gradient-primary text-white rounded-2xl rounded-br-sm px-4 py-3 max-w-[80%] ml-auto;
+  }
+
+  .chat-bubble-ai {
+    @apply glass-card text-gray-100 rounded-2xl rounded-bl-sm px-4 py-3 max-w-[85%];
+  }
+
+  /* Transaction confirm card */
+  .transaction-preview-card {
+    @apply glass-card border border-primary-500/30 p-4 rounded-xl;
+  }
+
+  /* Progress bar */
+  .progress-bar {
+    @apply w-full bg-surface-600 rounded-full overflow-hidden;
+  }
+
+  .progress-fill {
+    @apply h-full rounded-full transition-all duration-700 ease-out;
+  }
+
+  /* Badge */
+  .badge {
+    @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+
+  .badge-income {
+    @apply badge bg-success-500/20 text-success-400 border border-success-500/30;
+  }
+
+  .badge-expense {
+    @apply badge bg-danger-500/20 text-danger-400 border border-danger-500/30;
+  }
+
+  .badge-neutral {
+    @apply badge bg-surface-600 text-gray-300 border border-surface-500;
+  }
+
+  /* Shimmer skeleton */
+  .skeleton {
+    @apply bg-gradient-to-r from-surface-700 via-surface-600 to-surface-700 bg-[length:200%_100%] animate-shimmer rounded-lg;
+  }
+
+  /* Stats card */
+  .stat-card {
+    @apply glass-card p-6 flex flex-col gap-2;
+  }
+
+  /* Modal overlay */
+  .modal-overlay {
+    @apply fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4;
+  }
+
+  .modal-content {
+    @apply glass-card max-w-md w-full p-6 animate-slide-up;
+  }
+
+  /* Glow ring */
+  .glow-ring {
+    @apply ring-2 ring-primary-500/50 ring-offset-2 ring-offset-surface-800;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* Custom grid areas */
+  .grid-dashboard {
+    grid-template-areas:
+      "balance income expense savings"
+      "chart chart categories recent"
+      "goals goals trends trends";
+  }
+
+  /* Blur overlays */
+  .blur-overlay {
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+
+  /* Number formatting */
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Smooth appear */
+  .appear {
+    animation: fadeIn 0.4s ease-out both;
+  }
+
+  .appear-delay-1 { animation-delay: 0.1s; }
+  .appear-delay-2 { animation-delay: 0.2s; }
+  .appear-delay-3 { animation-delay: 0.3s; }
+  .appear-delay-4 { animation-delay: 0.4s; }
+  .appear-delay-5 { animation-delay: 0.5s; }
+}
