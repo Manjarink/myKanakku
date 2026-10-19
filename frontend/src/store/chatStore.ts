@@ -18,7 +18,7 @@ interface ChatState {
   deleteConversation: (id: string) => Promise<void>;
 
   // Messaging
-  sendMessage: (content: string) => Promise<void>;
+  sendMessage: (content: string, onReset?: () => void) => Promise<void>;
   confirmTransactions: (transactions: ParsedTransaction[]) => Promise<void>;
   cancelPendingAction: () => void;
   clearMessages: () => void;
@@ -37,7 +37,21 @@ export const useChatStore = create<ChatState>((set, get) => ({
     set({ isLoading: true });
     try {
       const { data } = await api.get<{ data: Conversation[] }>('/conversations');
-      set({ conversations: data.data, isLoading: false });
+      const convs = data.data || [];
+      set({ conversations: convs, isLoading: false });
+
+      // Auto-load latest conversation if none active
+      const { activeConversationId } = get();
+      if (!activeConversationId && convs.length > 0) {
+        const latest = convs[0];
+        set({ isLoading: true, activeConversationId: latest.id });
+        try {
+          const msgRes = await api.get<{ data: ChatMessage[] }>(`/conversations/${latest.id}/messages`);
+          set({ messages: msgRes.data.data || [], isLoading: false });
+        } catch {
+          set({ isLoading: false });
+        }
+      }
     } catch {
       set({ isLoading: false });
     }
@@ -58,7 +72,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
     set({ isLoading: true, activeConversationId: id });
     try {
       const { data } = await api.get<{ data: ChatMessage[] }>(`/conversations/${id}/messages`);
-      set({ messages: data.data, isLoading: false });
+      set({ messages: data.data || [], isLoading: false });
     } catch {
       set({ isLoading: false });
     }
@@ -79,7 +93,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
     });
   },
 
-  sendMessage: async (content) => {
+  sendMessage: async (content, onReset) => {
     const { activeConversationId } = get();
     let conversationId = activeConversationId;
 
@@ -103,6 +117,20 @@ export const useChatStore = create<ChatState>((set, get) => ({
       });
 
       const aiMsg = data.data;
+
+      // Handle reset_all_expenses: refresh dashboard and clear pending state
+      if (aiMsg.intent === 'reset_all_expenses') {
+        set((state) => ({
+          messages: [...state.messages, aiMsg],
+          isSending: false,
+          pendingTransactions: null,
+        }));
+        // Notify parent to refresh dashboard
+        if (onReset) onReset();
+        await get().fetchConversations();
+        return;
+      }
+
       set((state) => ({
         messages: [...state.messages, aiMsg],
         isSending: false,
@@ -118,7 +146,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
           id: `err-${Date.now()}`,
           conversationId,
           role: 'assistant' as const,
-          content: `Error: ${message}. Please try again.`,
+          content: `❌ Error: ${message}. Please check your connection or try again.`,
           createdAt: new Date().toISOString(),
         }],
         isSending: false,

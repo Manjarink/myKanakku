@@ -17,6 +17,7 @@ const QUICK_PROMPTS = [
   'Show my top spending categories',
   'Help me save ₹2000 this month',
   'I received ₹5000 today',
+  'Delete all my expenses and start fresh',
 ];
 
 function TypingIndicator() {
@@ -192,7 +193,11 @@ export default function ChatPage() {
     const text = input.trim();
     if (!text || isSending) return;
     setInput('');
-    await sendMessage(text);
+    await sendMessage(text, async () => {
+      // After reset, refresh dashboard
+      await refreshDashboard();
+      toast.success('✅ All expenses deleted! Dashboard refreshed.');
+    });
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {

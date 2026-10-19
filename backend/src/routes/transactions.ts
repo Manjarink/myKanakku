@@ -181,4 +181,30 @@ router.delete('/:id', async (req: AuthRequest, res: Response) => {
   }
 });
 
+// DELETE /api/transactions - Delete ALL transactions for the current user (reset)
+router.delete('/', async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.userId!;
+
+    // Delete from memory store
+    const count = dataStore.deleteAllTransactions(userId);
+
+    // Delete from Supabase
+    try {
+      await supabaseAdmin
+        .from('transactions')
+        .delete()
+        .eq('user_id', userId);
+    } catch (dbErr) {
+      logger.warn('Bulk delete from Supabase failed (memory store cleared)', { dbErr });
+    }
+
+    auditLog('ALL_TRANSACTIONS_DELETED', userId, { count });
+    res.json({ success: true, message: `Deleted all ${count} transactions. You can start fresh!` });
+  } catch (err: unknown) {
+    logger.error('Delete all transactions error', { err });
+    res.status(500).json({ success: false, error: 'Failed to delete all transactions' });
+  }
+});
+
 export default router;

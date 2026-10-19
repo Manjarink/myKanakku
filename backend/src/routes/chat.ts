@@ -92,6 +92,37 @@ router.post('/:conversationId/message', [
     const msgId = uuidv4();
     const now = new Date().toISOString();
 
+    // Handle special intents
+    if (aiResponse.intent === 'reset_all_expenses') {
+      // Auto-delete all transactions for user
+      dataStore.deleteAllTransactions(userId);
+      try {
+        await supabaseAdmin.from('transactions').delete().eq('user_id', userId);
+      } catch { /* Ignored */ }
+
+      const resetMsg = '✅ Done! All your expenses have been deleted. Your tracker is now reset. Start tracking fresh! 🎉';
+      chatMemoryStore.addMessage(conversationId, 'assistant', resetMsg, 'reset_all_expenses');
+      try {
+        await supabaseAdmin.from('chat_messages').insert({
+          conversation_id: conversationId,
+          role: 'assistant',
+          content: resetMsg,
+          intent: 'reset_all_expenses',
+        });
+      } catch { /* Ignored */ }
+      return res.json({
+        success: true,
+        data: {
+          id: uuidv4(),
+          conversationId,
+          role: 'assistant',
+          content: resetMsg,
+          intent: 'reset_all_expenses',
+          createdAt: now,
+        },
+      });
+    }
+
     // Record AI message in DB if available
     try {
       await supabaseAdmin.from('chat_messages').insert({

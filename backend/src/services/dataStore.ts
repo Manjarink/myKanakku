@@ -226,6 +226,17 @@ class UnifiedDataStore {
     return false;
   }
 
+  deleteAllTransactions(userId: string): number {
+    let count = 0;
+    for (const [id, tx] of this.transactions.entries()) {
+      if (tx.userId === userId) {
+        this.transactions.delete(id);
+        count++;
+      }
+    }
+    return count;
+  }
+
   // ─── Budgets ────────────────────────────────────────────────────────────────
   getBudgets(userId: string): StoredBudget[] {
     const existing = Array.from(this.budgets.values()).filter((b) => b.userId === userId);
